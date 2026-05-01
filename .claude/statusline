@@ -1,0 +1,35 @@
+# statusline — Config de barra inferior
+
+## Formato
+
+```
+{model} [{branch}] {context} [{errors}]
+```
+
+## Ejemplo
+
+```
+claude-sonnet [main] features/auth +2/-1 ⚠ 2
+```
+
+## Componentes
+
+- `{model}`: Modelo actual
+- `{branch}`: Git branch
+- `{context}`: Cambios (+/- lineas)
+- `{errors}`: Errores de lint/test
+- `{⚠}`: Warning si hay errores
+
+## Activar
+
+Set en settings.json:
+
+```json
+{
+  "statusline": "{model} [{gitBranch}] {contextDelta} {lintErrors}"
+}
+```
+
+---
+
+_Visualización en la barra inferior_

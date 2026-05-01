@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Selector — routing interactivo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+      font-size: 13px;
+      padding: 14px 12px 28px;
+      background: var(--color-background-default, #fff);
+      color: var(--color-text-primary, #24292f);
+    }
+    .tabs {
+      display: flex;
+      gap: 0;
+      border: 0.5px solid var(--color-border-secondary, #d0d7de);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+    .tab {
+      padding: 7px 18px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--color-background-secondary, #f6f8fa);
+      color: var(--color-text-secondary, #57606a);
+      border: none;
+      font-family: var(--font-sans);
+      transition: all 0.15s;
+    }
+    .tab.active {
+      background: var(--color-background-primary, #fff);
+      color: var(--color-text-primary, #24292f);
+      font-weight: 500;
+    }
+    .panel {
+      display: none;
+    }
+    .panel.active {
+      display: block;
+    }
+
+    /* BY COMPANY */
+    .company-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .co-card {
+      background: var(--color-background-primary, #fff);
+      border: 0.5px solid var(--color-border-tertiary, #eaeef2);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .co-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .co-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-primary, #24292f);
+    }
+    .co-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .preferred {
+      background: #E1F5EE;
+      color: #085041;
+    }
+    .fallback {
+      background: #FAEEDA;
+      color: #633806;
+    }
+    .local {
+      background: #EEEDFE;
+      color: #3C3489;
+    }
+    @media (prefers-color-scheme: dark) {
+      .preferred {
+        background: #04342C;
+        color: #9FE1CB;
+      }
+      .fallback {
+        background: #412402;
+        color: #FAC775;
+      }
+      .local {
+        background: #26215C;
+        color: #CECBF6;
+      }
+    }
+    .model-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-top: 0.5px solid var(--color-border-tertiary, #eaeef2);
+    }
+    .model-row:first-of-type {
+      border-top: none;
+    }
+    .mr-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mr-name {
+      font-size: 11.5px;
+      color: var(--color-text-primary, #24292f);
+    }
+    .mr-role {
+      font-size: 10px;
+      color: var(--color-text-tertiary, #8c959f);
+    }
+    .mr-bars {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1px;
+    }
+    .bar-label {
+      font-size: 9px;
+      color: var(--color-text-tertiary, #8c959f);
+    }
+    .mini-bar {
+      height: 4px;
+      border-radius: 2px;
+      min-width: 4px;
+    }
+    .iq-bar {
+      background: #7F77DD;
+    }
+    .spd-bar {
+      background: #1D9E75;
+    }
+
+    /* UNIFIED */
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .task-row {
+      background: var(--color-background-primary, #fff);
+      border: 0.5px solid var(--color-border-tertiary, #eaeef2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .task-row:hover {
+      border-color: var(--color-border-secondary, #d0d7de);
+    }
+    .task-row.open {
+      border-color: var(--color-border-primary, #8c959f);
+    }
+    .tr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tr-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-primary, #24292f);
+    }
+    .tr-winner {
+      font-size: 11px;
+      color: var(--color-text-secondary, #57606a);
+    }
+    .tr-body {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 0.5px solid var(--color-border-tertiary, #eaeef2);
+      display: none;
+    }
+    .task-row.open .tr-body {
+      display: block;
+    }
+    .candidate-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .candidate {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 0;
+    }
+    .cand-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cand-name {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--color-text-primary, #24292f);
+    }
+    .cand-co {
+      font-size: 10px;
+      color: var(--color-text-tertiary, #8c959f);
+    }
+    .cand-scores {
+      display: flex;
+      gap: 10px;
+    }
+    .score {
+      font-size: 10px;
+      color: var(--color-text-secondary, #57606a);
+    }
+    .score b {
+      color: var(--color-text-primary, #24292f);
+    }
+    .rank-1 {
+      border-left: 2px solid #1D9E75;
+      padding-left: 6px;
+    }
+    .rank-2 {
+      border-left: 2px solid #BA7517;
+      padding-left: 6px;
+      opacity: 0.8;
+    }
+    .rank-3 {
+      border-left: 2px solid var(--color-border-secondary, #d0d7de);
+      padding-left: 6px;
+      opacity: 0.6;
+    }
+    .why {
+      font-size: 10px;
+      color: var(--color-text-tertiary, #8c959f);
+      margin-top: 2px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--color-text-secondary, #57606a);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 800px) {
+      .company-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('company')">Por empresa</button>
+    <button class="tab" onclick="switchTab('unified')">Unificado por especialidad</button>
+  </div>
+
+  <div class="panel active" id="panel-company">
+    <div class="legend">
+      <div class="leg"><div class="dot" style="background:#1D9E75"></div> preferido (Claude Code)</div>
+      <div class="leg"><div class="dot" style="background:#BA7517"></div> fallback Blackbox</div>
+      <div class="leg"><div class="dot" style="background:#7F77DD"></div> local / open-weight</div>
+      <div class="leg"><div class="mini-bar iq-bar" style="width:16px;height:6px;border-radius:2px"></div> IQ /66</div>
+      <div class="leg"><div class="mini-bar spd-bar" style="width:16px;height:6px;border-radius:2px"></div> t/s /211</div>
+    </div>
+    <div class="company-grid">
+
+      <div class="co-card">
+        <div class="co-header"><span class="co-name">Anthropic</span><span class="co-badge preferred">preferido</span></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Claude 3.7 Sonnet</span><span class="mr-role">principal</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 48</span><div class="mini-bar iq-bar" style="width:44px"></div></div><div class="bar-wrap"><span class="bar-label">78 t/s</span><div class="mini-bar spd-bar" style="width:28px"></div></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Claude 3.5 Haiku</span><span class="mr-role">rápido</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 35</span><div class="mini-bar iq-bar" style="width:32px"></div></div><div class="bar-wrap"><span class="bar-label">66 t/s</span><div class="mini-bar spd-bar" style="width:24px"></div></div></div></div>
+      </div>
+
+      <div class="co-card">
+        <div class="co-header"><span class="co-name">OpenAI</span><span class="co-badge fallback">fallback</span></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">o3-mini high</span><span class="mr-role">razonamiento</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 66</span><div class="mini-bar iq-bar" style="width:60px"></div></div><div class="bar-wrap"><span class="bar-label">31 t/s</span><div class="mini-bar spd-bar" style="width:10px"></div></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">o1</span><span class="mr-role">análisis</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 62</span><div class="mini-bar iq-bar" style="width:56px"></div></div><div class="bar-wrap"><span class="bar-label">—</span></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">GPT-4o</span><span class="mr-role">general</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 41</span><div class="mini-bar iq-bar" style="width:37px"></div></div><div class="bar-wrap"><span class="bar-label">50 t/s</span><div class="mini-bar spd-bar" style="width:18px"></div></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">o1-mini</span><span class="mr-role">velocidad</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 54</span><div class="mini-bar iq-bar" style="width:49px"></div></div><div class="bar-wrap"><span class="bar-label">211 t/s</span><div class="mini-bar spd-bar" style="width:64px"></div></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">GPT-4o mini</span><span class="mr-role">bajo costo</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 36</span><div class="mini-bar iq-bar" style="width:33px"></div></div><div class="bar-wrap"><span class="bar-label">107 t/s</span><div class="mini-bar spd-bar" style="width:38px"></div></div></div></div>
+      </div>
+
+      <div class="co-card">
+        <div class="co-header"><span class="co-name">Google</span><span class="co-badge fallback">fallback</span></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Gemini 2.0 Pro Exp</span><span class="mr-role">balance</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 49</span><div class="mini-bar iq-bar" style="width:44px"></div></div><div class="bar-wrap"><span class="bar-label">117 t/s</span><div class="mini-bar spd-bar" style="width:42px"></div></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Gemini 2.0 Flash</span><span class="mr-role">velocidad</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 48</span><div class="mini-bar iq-bar" style="width:43px"></div></div><div class="bar-wrap"><span class="bar-label">172 t/s</span><div class="mini-bar spd-bar" style="width:56px"></div></div></div></div>
+      </div>
+
+      <div class="co-card">
+        <div class="co-header"><span class="co-name">DeepSeek</span><span class="co-badge fallback">fallback</span></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">DeepSeek R1</span><span class="mr-role">código / math</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 60</span><div class="mini-bar iq-bar" style="width:55px"></div></div><div class="bar-wrap"><span class="bar-label">26 t/s</span><div class="mini-bar spd-bar" style="width:8px"></div></div></div></div>
+      </div>
+
+      <div class="co-card">
+        <div class="co-header"><span class="co-name">Meta / Ollama</span><span class="co-badge local">local</span></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Llama 3.3 70B</span><span class="mr-role">offline</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 41</span><div class="mini-bar iq-bar" style="width:37px"></div></div><div class="bar-wrap"><span class="bar-label">99 t/s</span><div class="mini-bar spd-bar" style="width:36px"></div></div></div></div>
+      </div>
+
+      <div class="co-card">
+        <div class="co-header"><span class="co-name">AWS / Mistral</span><span class="co-badge fallback">fallback</span></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Nova Pro</span><span class="mr-role">AWS Bedrock</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 37</span><div class="mini-bar iq-bar" style="width:33px"></div></div><div class="bar-wrap"><span class="bar-label">83 t/s</span><div class="mini-bar spd-bar" style="width:30px"></div></div></div></div>
+        <div class="model-row"><div class="mr-left"><span class="mr-name">Mistral Large 2</span><span class="mr-role">europeo</span></div><div class="mr-bars"><div class="bar-wrap"><span class="bar-label">IQ 38</span><div class="mini-bar iq-bar" style="width:34px"></div></div><div class="bar-wrap"><span class="bar-label">47 t/s</span><div class="mini-bar spd-bar" style="width:16px"></div></div></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel" id="panel-unified">
+    <div class="matrix">
+
+      <div class="task-row" onclick="toggle(this)">
+        <div class="tr-header"><span class="tr-title">Velocidad máxima — drafts, formato, edits</span><span class="tr-winner">→ o1-mini · 211 t/s</span></div>
+        <div class="tr-body"><div class="candidate-list">
+          <div class="candidate rank-1"><div class="cand-left"><span class="cand-name">o1-mini</span><span class="cand-co">OpenAI</span></div><div class="cand-scores"><span class="score">IQ <b>54</b></span><span class="score">vel <b>211</b></span></div></div>
+          <div class="why">Más rápido del benchmark. Buena inteligencia para tareas simples.</div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">Gemini 2.0 Flash</span><span class="cand-co">Google</span></div><div class="cand-scores"><span class="score">IQ <b>48</b></span><span class="score">vel <b>172</b></span></div></div>
+          <div class="candidate rank-3"><div class="cand-left"><span class="cand-name">Claude 3.5 Haiku</span><span class="cand-co">Anthropic</span></div><div class="cand-scores"><span class="score">IQ <b>35</b></span><span class="score">vel <b>66</b></span></div></div>
+          <div class="why">Preferido dentro de Claude Code por integración con .claude/</div>
+        </div></div>
+      </div>
+
+      <div class="task-row" onclick="toggle(this)">
+        <div class="tr-header"><span class="tr-title">Balance inteligencia + velocidad — código, análisis</span><span class="tr-winner">→ Gemini Pro · IQ 49 / 117 t/s</span></div>
+        <div class="tr-body"><div class="candidate-list">
+          <div class="candidate rank-1"><div class="cand-left"><span class="cand-name">Gemini 2.0 Pro Exp</span><span class="cand-co">Google</span></div><div class="cand-scores"><span class="score">IQ <b>49</b></span><span class="score">vel <b>117</b></span></div></div>
+          <div class="why">Mejor ratio IQ/velocidad del benchmark. Ideal para fallback mid-session.</div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">Claude 3.7 Sonnet</span><span class="cand-co">Anthropic</span></div><div class="cand-scores"><span class="score">IQ <b>48</b></span><span class="score">vel <b>78</b></span></div></div>
+          <div class="why">Preferido con contexto .claude/ activo. IQ similar, más lento.</div>
+          <div class="candidate rank-3"><div class="cand-left"><span class="cand-name">GPT-4o mini</span><span class="cand-co">OpenAI</span></div><div class="cand-scores"><span class="score">IQ <b>36</b></span><span class="score">vel <b>107</b></span></div></div>
+        </div></div>
+      </div>
+
+      <div class="task-row" onclick="toggle(this)">
+        <div class="tr-header"><span class="tr-title">Razonamiento máximo — investigación, estrategia</span><span class="tr-winner">→ o3-mini high · IQ 66</span></div>
+        <div class="tr-body"><div class="candidate-list">
+          <div class="candidate rank-1"><div class="cand-left"><span class="cand-name">o3-mini high</span><span class="cand-co">OpenAI</span></div><div class="cand-scores"><span class="score">IQ <b>66</b></span><span class="score">vel <b>31</b></span></div></div>
+          <div class="why">Techo de inteligencia del benchmark. Muy lento — solo para tareas que lo justifiquen.</div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">o1</span><span class="cand-co">OpenAI</span></div><div class="cand-scores"><span class="score">IQ <b>62</b></span></div></div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">DeepSeek R1</span><span class="cand-co">DeepSeek</span></div><div class="cand-scores"><span class="score">IQ <b>60</b></span><span class="score">vel <b>26</b></span></div></div>
+          <div class="why">Open-weight. Alta inteligencia para código y matemáticas. Alternativa gratuita.</div>
+        </div></div>
+      </div>
+
+      <div class="task-row" onclick="toggle(this)">
+        <div class="tr-header"><span class="tr-title">Código y matemáticas — open weight</span><span class="tr-winner">→ DeepSeek R1 · IQ 60</span></div>
+        <div class="tr-body"><div class="candidate-list">
+          <div class="candidate rank-1"><div class="cand-left"><span class="cand-name">DeepSeek R1</span><span class="cand-co">DeepSeek</span></div><div class="cand-scores"><span class="score">IQ <b>60</b></span><span class="score">vel <b>26</b></span></div></div>
+          <div class="why">3er lugar global en IQ. Open-weight, self-hosteable. Ideal para Blackbox + Ollama combo.</div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">Claude 3.7 Sonnet</span><span class="cand-co">Anthropic</span></div><div class="cand-scores"><span class="score">IQ <b>48</b></span><span class="score">vel <b>78</b></span></div></div>
+          <div class="why">Preferido si tienes .claude/skills/ configurado para el proyecto.</div>
+        </div></div>
+      </div>
+
+      <div class="task-row" onclick="toggle(this)">
+        <div class="tr-header"><span class="tr-title">Datos sensibles / sin conexión</span><span class="tr-winner">→ Llama 3.3 70B · local</span></div>
+        <div class="tr-body"><div class="candidate-list">
+          <div class="candidate rank-1"><div class="cand-left"><span class="cand-name">Llama 3.3 70B</span><span class="cand-co">Meta · Ollama</span></div><div class="cand-scores"><span class="score">IQ <b>41</b></span><span class="score">vel <b>99</b></span></div></div>
+          <div class="why">Corre localmente. Ningún dato sale de la máquina. Buena velocidad para su tamaño.</div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">DeepSeek R1</span><span class="cand-co">Ollama self-host</span></div><div class="cand-scores"><span class="score">IQ <b>60</b></span></div></div>
+          <div class="why">Si tienes hardware suficiente, mayor inteligencia que Llama con self-host.</div>
+        </div></div>
+      </div>
+
+      <div class="task-row" onclick="toggle(this)">
+        <div class="tr-header"><span class="tr-title">Cumplimiento / regulación europea</span><span class="tr-winner">→ Mistral Large 2</span></div>
+        <div class="tr-body"><div class="candidate-list">
+          <div class="candidate rank-1"><div class="cand-left"><span class="cand-name">Mistral Large 2</span><span class="cand-co">Mistral AI</span></div><div class="cand-scores"><span class="score">IQ <b>38</b></span><span class="score">vel <b>47</b></span></div></div>
+          <div class="why">Empresa europea, GDPR-native. Para proyectos con restricciones de localización de datos.</div>
+          <div class="candidate rank-2"><div class="cand-left"><span class="cand-name">Nova Pro</span><span class="cand-co">AWS Bedrock</span></div><div class="cand-scores"><span class="score">IQ <b>37</b></span><span class="score">vel <b>83</b></span></div></div>
+          <div class="why">Si el stack ya está en AWS. Más rápido que Mistral.</div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function switchTab(t) {
+      document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('active', ['company', 'unified'][i] === t));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + t).classList.add('active');
+    }
+    function toggle(el) {
+      const wasOpen = el.classList.contains('open');
+      document.querySelectorAll('.task-row').forEach(r => r.classList.remove('open'));
+      if (!wasOpen) el.classList.add('open');
+    }
+  </script>
+</body>
+</html>

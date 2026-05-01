@@ -1,0 +1,41 @@
+{
+  "_note": "MUST be at project root, NOT in .claude/. Secrets via ${ENV_VAR} only.",
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "_use": "Browser automation, E2E testing, scraping"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_TOKEN}",
+        "SUPABASE_PROJECT_REF": "${SUPABASE_REF}"
+      },
+      "_use": "Database operations, auth, storage"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "_use": "Issues, PRs, repos, actions"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${PWD}"],
+      "_use": "File operations beyond the project root"
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+      },
+      "_use": "Notificaciones, Daily Scrum, alertas"
+    }
+  }
+}

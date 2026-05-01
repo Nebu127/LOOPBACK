@@ -1,0 +1,3 @@
+# Ignore local secret key documentation and overrides
+keys.local.md
+CLAUDE.local.md

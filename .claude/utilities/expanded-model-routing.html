@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expanded Model Routing 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;font-size:13px;padding:14px 12px 40px;background:var(--color-background-primary)}
+    .tabs{display:flex;gap:0;border:0.5px solid var(--color-border-secondary);border-radius:8px;overflow:hidden;margin-bottom:14px;width:fit-content}
+    .tab{padding:7px 14px;font-size:12px;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+    .tab.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500}
+    .panel{display:none}.panel.active{display:block}
+    .fn{font-size:10px;color:var(--color-text-tertiary);margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab active" onclick="sw('router')">🧭 Router</button>
+    <button class="tab" onclick="sw('co')">Por empresa</button>
+    <button class="tab" onclick="sw('un')">Unificado</button>
+  </div>
+
+  <div class="panel active" id="panel-router">
+    <p>Router interactivo — ver <strong>model-routing.md</strong> para detalles completos.</p>
+  </div>
+
+  <div class="panel" id="panel-co">
+    <p>Ver <strong>.claude/rules/model-routing.md</strong> — PARTE 1</p>
+  </div>
+
+  <div class="panel" id="panel-un">
+    <p>Ver <strong>.claude/rules/model-routing.md</strong> — PARTE 2</p>
+  </div>
+
+  <div class="fn">* Documento principal: .claude/rules/model-routing.md · Fuente: Artificial Analysis Intelligence Index v4.0 · abril 2026</div>
+
+  <script>
+    function sw(t){
+      const tabs=['router','co','un'];
+      document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',tabs[i]===t));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      document.getElementById('panel-'+t).classList.add('active');
+    }
+  </script>
+</body>
+</html>
